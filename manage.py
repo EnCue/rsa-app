@@ -14,8 +14,19 @@ class RSA_system:
 
         o = self.phi
         m = b
+        
+        #r_vals = []
+        t_i = 0
+        t_ii = 1
+        
         reduce = True
         while(reduce):
+            #r_vals.append(m)
+            q = int(o / m)
+            t_new = t_i - t_ii*q
+            t_i = t_ii
+            t_ii = t_new
+            
             holder = m
             m = o % m
             o = holder
@@ -24,17 +35,22 @@ class RSA_system:
                 reduce = False
 
         print("GCD: " + str(m))
+        print(t_ii)
+        #print(r_vals)
 
         if(m == 1):
             print("Valid b")
             self.b = b
             #GENERATE A
 
+            a = t_ii
+
             return True
         else:
             print("Entered number not relatively prime to " + str(self.phi))
             return False
-        
+    
+
 
         
 
@@ -90,8 +106,13 @@ def getPrimes():
 
 
 
-r = input('Select a mode: G - generate, E - encrypt, D - decrypt. \n')
+"""r = input('Select a mode: G - generate, E - encrypt, D - decrypt. \n')
 
 if(r.upper() == "G"):
     print("Generating new RSA cryptosystem.")
     createSystem()
+"""
+
+cs = RSA_system([5, 7])
+cs.EEA(11)
+
