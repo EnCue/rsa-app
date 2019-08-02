@@ -1,6 +1,5 @@
 
-
-class RSA_system:
+class RSA_System:
 
     def __init__(self, primes):
         self.p, self.q = primes[0], primes[1]
@@ -8,7 +7,7 @@ class RSA_system:
         self.phi = (self.p - 1) * (self.q - 1)
 
     def display(self):
-        print('New RSA scheme created\n')
+        print('New RSA scheme created:\n')
         print('Primes: ' + str(self.p) + ', ' + str(self.q))
         print('Modulus: ' + str(self.n))
         print('Phi(n): ' + str(self.phi))
@@ -20,14 +19,14 @@ class RSA_system:
 
         return e
 
-    def Decrypt(self, msg):
-        unreduced_d = msg ** self.a
+    def Decrypt(self, msg, a):
+        unreduced_d = msg ** a
         d = unreduced_d % self.n
 
         return d
     
     def EEA(self, b):
-        print("Running EEA")
+        #print("Running EEA")
 
         q_list = []
 
@@ -58,7 +57,7 @@ class RSA_system:
         #print(r_vals)
 
         if(m == 1):
-            print("Valid b")
+            #print("Valid b")
             self.b = b
             #GENERATE A
 
@@ -79,14 +78,33 @@ class RSA_system:
     
 
 
+class SimulatedScheme:
+
+    def __init__(self, specs):
+        self.n = specs['modulus']
+        self.b = specs['public exponent']
+    
+    def Encrypt(self, msg):
+        unreduced_e = msg ** self.b
+        e = unreduced_e % self.n
         
+        return e
+
+    def Decrypt(self, msg, a):
+        unreduced_d = msg ** a
+        d = unreduced_d % self.n
+
+        return d
+    
+
+
 
 
 def createSystem():
     
     primes = getPrimes()
 
-    cryptosystem = RSA_system(primes)
+    cryptosystem = RSA_System(primes)
 
     getExponents(cryptosystem)
     
@@ -134,11 +152,12 @@ def getPrimes():
     return p_list
 
 
-def useScheme(cs):
-    mode = input('Encrypt or decrypt a new integer (E or D)\n')
+def useScheme(cs, mode):
+    #mode = input('Encrypt or decrypt a new integer (E or D)\n')
+    #print("\n")
 
-    if(mode.upper() == "E"):
-        plaintext = input('Enter plaintext integer to be encrypted: ')
+    if(mode == "E"):
+        plaintext = input('\nEnter plaintext integer to be encrypted: ')
         try:
             msg = int(plaintext)
             encryptedmsg = cs.Encrypt(msg)
@@ -146,31 +165,77 @@ def useScheme(cs):
             print('Encrypted form of message: ' + str(encryptedmsg))
         except:
             print('Invalid plaintext entered. Try again.')
-            useScheme(cs)
-    elif(mode.upper() == "D"):
-        e_plaintext = input('Enter encrypted message to be decrypted: ')
+            useScheme(cs, mode)
+    elif(mode == "D"):
+        e_plaintext = input('\nEnter encrypted message to be decrypted: ')
         try:
             e_msg = int(e_plaintext)
-            msg = cs.Decrypt(e_msg)
+
+            a = getInt("private exponent")
+            
+            msg = cs.Decrypt(e_msg, a)
 
             print('Encrypted form of message: ' + str(msg))
         except:
             print('Invalid plaintext entered. Try again.')
-            useScheme(cs)
+            useScheme(cs, mode)
     
 
 
+def getRSASpecs():
+    print("\nEnter specifications of RSA system")
 
-r = input('Select a mode: G - generate, E - encrypt, D - decrypt. \n')
+    specs = {'modulus': 0, 'public exponent': 1}
+    for t in specs.keys():
+        newEntry = getInt(t)
+        specs[t] = newEntry
 
-if(r.upper() == "G"):
-    print("Generating new RSA cryptosystem.")
-    cs = createSystem()
+    print("System generated.")
+    return specs
 
-    cs.display()
+
+def getInt(title):
+
+    int_str = input("Enter integer value for " + title + ": ")
+
+    int_rtrn = 0
+    try:
+        int_rtrn = int(int_str)
+    except:
+        print("Invalid entry value")
+
+    return int_rtrn
+
+
+
+def run():
+    r = input("Select a mode: G - generate, E - encrypt, D - decrypt. \n")
+    #print("\n")
+    
+    if(r.upper() == "G"):
+        print("Generating new RSA cryptosystem...")
+        cs = createSystem()
+        print("\n")
+
+        cs.display()
+        print("\n\n")
+        
+    elif(r.upper() == "E" or r.upper() == "D"):
+        #print("\n")
+        specs = getRSASpecs()
+
+        sim = SimulatedScheme(specs)
+
+        useScheme(sim, r.upper())
+
     print("\n\n")
+    
+    run()
 
-    useScheme(cs)
+    
+
+run()
+
 
 
 #cs = RSA_system([7, 13])
