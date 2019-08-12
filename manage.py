@@ -7,7 +7,7 @@ class RSA_System:
         self.phi = (self.p - 1) * (self.q - 1)
 
     def display(self):
-        print('New RSA scheme created:\n')
+        print('New RSA scheme created:')
         print('Primes: ' + str(self.p) + ', ' + str(self.q))
         print('Modulus: ' + str(self.n))
         print('Phi(n): ' + str(self.phi))
@@ -82,7 +82,11 @@ class SimulatedScheme:
 
     def __init__(self, specs):
         self.n = specs['modulus']
-        self.b = specs['public exponent']
+        try:
+            self.b = specs['public exponent']
+        except:
+            pass
+        
     
     def Encrypt(self, msg):
         unreduced_e = msg ** self.b
@@ -117,7 +121,7 @@ def createSystem():
 
 def getExponents(s):
 
-    b_str = input('Enter integer mod ' + str(s.n) + ' for an encryption exponent:\n')
+    b_str = input('\nEnter a relatively prime integer, mod ' + str(s.phi) + ', for an encryption exponent:\n')
 
     try:
         b = int(b_str)
@@ -143,7 +147,14 @@ def getPrimes():
         try:
             new_p = int(i)
             #ADD PRIMALITY TEST
-            p_list.append(new_p)
+            prime = testPrimality(new_p)
+            if(prime):
+                p_list.append(new_p)
+            else:
+                print("Composite integer entered.")
+                p_list = getPrimes()
+                break
+            
         except:
             print('Non-numerical value entered.')
 
@@ -182,15 +193,19 @@ def useScheme(cs, mode):
     
 
 
-def getRSASpecs():
+def getRSASpecs(m):
     print("\nEnter specifications of RSA system")
 
-    specs = {'modulus': 0, 'public exponent': 1}
+    if(m == "E"):
+        specs = {'modulus': 0, 'public exponent': 1}
+    elif(m == "D"):
+        specs = {'modulus': 0}
+    
     for t in specs.keys():
         newEntry = getInt(t)
         specs[t] = newEntry
 
-    print("System generated.")
+    print("System instantiated.")
     return specs
 
 
@@ -207,22 +222,37 @@ def getInt(title):
     return int_rtrn
 
 
+def testPrimality(n):
+
+    isPrime = True
+
+    sq = int(n**1/2)
+
+    for i in range(2, (sq+1)):
+
+        fac = n / i
+        if(fac == int(fac) and fac != 1):
+            isPrime = False
+            break
+
+    return isPrime
+
+
 
 def run():
     r = input("Select a mode: G - generate, E - encrypt, D - decrypt. \n")
     #print("\n")
     
     if(r.upper() == "G"):
-        print("Generating new RSA cryptosystem...")
+        print("Generating new RSA cryptosystem... \n")
         cs = createSystem()
         print("\n")
 
         cs.display()
-        print("\n\n")
         
     elif(r.upper() == "E" or r.upper() == "D"):
         #print("\n")
-        specs = getRSASpecs()
+        specs = getRSASpecs(r.upper())
 
         sim = SimulatedScheme(specs)
 
